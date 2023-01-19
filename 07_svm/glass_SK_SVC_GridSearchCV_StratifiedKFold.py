@@ -166,6 +166,7 @@ np.set_printoptions(precision=2)
 
 class_names = np.unique(y)
 
+# confusion matrix without normalization
 disp = ConfusionMatrixDisplay.from_estimator(estimator=grid.best_estimator_,
                                              X=X_test,
                                              y=y_test,
@@ -175,6 +176,7 @@ disp = ConfusionMatrixDisplay.from_estimator(estimator=grid.best_estimator_,
 disp.ax_.set_title("Confusion matrix, without normalization")
 plt.show()
 
+# confusion matrix with normalization
 disp = ConfusionMatrixDisplay.from_estimator(estimator=grid.best_estimator_,
                                              X=X_test,
                                              y=y_test,

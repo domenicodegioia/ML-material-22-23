@@ -92,11 +92,11 @@ X_test = sc.transform(X_test)
 
 # DIMENSIONALITY REDUCTION
 # We identify how many components are needed to contain a variance above a threshold of about 80%.
-# For this purpose we use a comulative sum to identify the optimal value.
+# For this purpose we use a cumulative sum to identify the optimal value.
 pca = PCA(random_state=SEED)
 pca.fit(X_train)
-var_exp = pca.explained_variance_ratio_
-cum_var_exp = np.cumsum(var_exp)
+var_exp = pca.explained_variance_ratio_  # amount of variance explained by each of the selected components
+cum_var_exp = np.cumsum(var_exp)  # cumulative sum
 plt.figure(figsize=(8, 6))
 plt.bar(range(1, len(cum_var_exp) + 1), var_exp, align='center', label='individual variance explained', alpha=0.7)
 plt.step(range(1, len(cum_var_exp) + 1), cum_var_exp, where='mid', label='cumulative variance explained', color='red')
@@ -105,8 +105,8 @@ plt.xlabel('Principal components')
 plt.xticks(np.arange(1, len(var_exp) + 1, 1))
 plt.legend(loc='center right')
 plt.show()
-for i, _ in enumerate(cum_var_exp):
-    print("PC" + str(i + 1), f"Cumulative variance: {cum_var_exp[i] * 100} %")
+for i, j in enumerate(cum_var_exp):
+    print("PC" + str(i + 1), f"Cumulative variance: {j * 100} %")
 
 pca = PCA(n_components=5, random_state=SEED)
 X_train = pca.fit_transform(X_train, X_test)
@@ -116,18 +116,18 @@ X_test = pca.transform(X_test)
 
 kfold = StratifiedKFold(n_splits=10, random_state=SEED, shuffle=True)
 params = {
-    'C': [10, 50, 100],
-    'kernel': ('linear', 'rbf', 'sigmoid'),
-    'tol': [1e-2, 1e-3, 1e-4]
+    'C': [1, 10, 100, 1000],  # regularization parameter
+    # 'gamma': [1, 0.1, 0.001, 0.0001],  # how far influences the calculation of plausible line of separation
+    'kernel': ('linear', 'rbf', 'sigmoid', 'poly'),  # kernel type to be used in the algorithm
+    'tol': [1e-2, 1e-3, 1e-4]  # tolerance for stopping criterion
 }
 
-grid = GridSearchCV(estimator=SVC(), param_grid=params, cv=kfold,
-                    scoring='accuracy', verbose=1, n_jobs=1)
+grid = GridSearchCV(estimator=SVC(), param_grid=params, cv=kfold, scoring='accuracy', verbose=3, n_jobs=1)
 
 grid.fit(X_train, y_train)
 
 print('Best score: ', grid.best_score_)
-print('Best params:', grid.best_params_)
+print('Best params: ', grid.best_params_)
 
 
 # build the learning curves for the best model

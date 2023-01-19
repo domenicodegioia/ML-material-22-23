@@ -10,33 +10,26 @@ from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKF
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-sns.set_style('whitegrid')
-
 df = pd.read_csv('../data/glass.csv')
-
-features = df.columns[:-1].tolist()  # name of column in dataframe
 
 # distribution of target class
 print(df['Type'].value_counts())
 
-# skewness for each feature
-
+# SKEWNESS FOR EACH FEATURE
 # We want to plot the Skewness value: ideally we want this value close to 0.
 # Skewness is a measure of asymmetry or distortion of symmetric distribution.
 # It measures the deviation of the given distribution of a random variable from a symmetric distribution,
 # such as normal distribution. A normal distribution is without any skewness, as it is symmetrical on
 # both sides. Hence, a curve is regarded as skewed if it is shifted towards the right or the left.
+features = df.columns[:-1].tolist()  # name of column in dataframe
 for f in features:
     skew = df[f].skew()
-    sns.displot(df[f], kde=False,
-                label='Skew = %.3f' % (skew), bins=30)
+    sns.displot(df[f], kde=False, label='Skew = %.3f' % (skew), bins=30)
     plt.legend(loc='best')
     plt.show()
 
 
-# rimozione outliers
-
-# restituire gli indici degli outliers
+# RIMOZIONE OUTLIERS
 def outlier_hunt(df):
     outlier_indices = []
 
@@ -55,25 +48,24 @@ def outlier_hunt(df):
     # il relativo numero di occorrenze di quel valore nella lista
     outlier_indices = Counter(outlier_indices)
 
-    # samples che contengono outliers per almeno 3 feature
+    # lista dei samples che contengono outliers per almeno 3 feature
     # da eliminare successivamente
     multiple_outliers = list(k for k, v in outlier_indices.items() if v > 2)
 
     return multiple_outliers
 
 
-print(f'Dataset has {len(outlier_hunt(df[features]))} outliers')
-
 outlier_indices = outlier_hunt(df[features])
+print(f'Dataset has {len(outlier_hunt(df[features]))} outliers')
 df = df.drop(outlier_indices, axis=0).reset_index(drop=True)
-print(df.shape)
 
 # boxplot solution (display distribution with outliers)
 plt.figure(figsize=(8, 6))
 sns.boxplot(df[features])  # set showfliers=False to remove the outliers from the chart
 plt.show()
 
-# heatmap
+
+# HEATMAP
 # correlation matrix between all the features we are examining and our y-variable
 corr = df[features].corr()
 plt.figure(figsize=(16, 16))
@@ -83,23 +75,22 @@ sns.heatmap(corr, cbar=True, square=True, annot=True, fmt='.2',
 plt.title('Correlation Heatmap', fontdict={'fontsize': 38}, pad=32)
 plt.show()
 
-print(df['Type'].value_counts())
-
-# splitting -> scaling -> dimensionality reduction
+# SPLITTING -> SCALING -> DIMENSIONALITY REDUCTION
 # Pay attention to the order! It is important to perform normalization first and then
 # feature selection based on the components identified with PCA.
 
-# splitting
+# SPLITTING
 SEED = 42
 X = df[features]
 y = df['Type']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
 
-# scaling
+# SCALING
 sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
 
+# DIMENSIONALITY REDUCTION
 # We identify how many components are needed to contain a variance above a threshold of about 80%.
 # For this purpose we use a comulative sum to identify the optimal value.
 pca = PCA(random_state=SEED)

@@ -56,7 +56,7 @@ def outlier_hunt(df):
 
 
 outlier_indices = outlier_hunt(df[features])
-print(f'Dataset has {len(outlier_hunt(df[features]))} outliers')
+print(f'Dataset has {len(outlier_indices)} outliers')
 df = df.drop(outlier_indices, axis=0).reset_index(drop=True)
 
 # boxplot solution (display distribution with outliers)

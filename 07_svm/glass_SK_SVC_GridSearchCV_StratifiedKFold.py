@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.decomposition import PCA
-from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
 from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold, learning_curve
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
@@ -122,7 +122,7 @@ params = {
     'tol': [1e-2, 1e-3, 1e-4]  # tolerance for stopping criterion
 }
 
-grid = GridSearchCV(estimator=SVC(), param_grid=params, cv=kfold, scoring='accuracy', verbose=3, n_jobs=1)
+grid = GridSearchCV(estimator=SVC(), param_grid=params, cv=kfold, scoring='accuracy', verbose=1, n_jobs=1)
 
 grid.fit(X_train, y_train)
 
@@ -185,3 +185,17 @@ disp = ConfusionMatrixDisplay.from_estimator(estimator=grid.best_estimator_,
                                              normalize='true')
 disp.ax_.set_title("Normalized confusion matrix")
 plt.show()
+
+# Best score:  0.725
+# Best params:  {'C': 10, 'kernel': 'rbf', 'tol': 0.01}
+svc = SVC(C=10, kernel='rbf', tol=0.01, random_state=SEED)
+svc.fit(X_train, y_train)
+
+# print support vectors
+print(svc.support_vectors_)
+
+# predict on new sample
+preds = svc.predict(X_test)
+
+# metrics
+print('Accuracy: %.3f' % accuracy_score(y_test, preds))

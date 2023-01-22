@@ -5,33 +5,42 @@ import numpy as np
 
 class KMeans(object):
     def __init__(self, n_clusters=2, dist=euclidean_distances, random_state=42):
-        self.n_clusters = n_clusters
+        self.K = n_clusters
         self.dist = dist
         self.rstate = np.random.RandomState(random_state)
-        self.cluster_centers_ = []
+        self.centroids = []
 
     def fit(self, X):
+        # Randomly initialize K cluster centroids
         rint = self.rstate.randint
-        initial_indices = [rint(X.shape[0])]
-        for _ in range(self.n_clusters - 1):
+        initial_indices = [rint(X.shape[0])]  # indices of initial clusters
+        for _ in range(self.K - 1):
             i = rint(X.shape[0])
+            # check if point i is already extracted
             while i in initial_indices:
                 i = rint(X.shape[0])
             initial_indices.append(i)
-        self.cluster_centers_ = X[initial_indices, :]
+        # at this point: len(initial_indices) = K
+        self.centroids = X[initial_indices, :]
 
         continue_condition = True
 
         while continue_condition:
-            old_centroids = self.cluster_centers_.copy()
-            self.y_pred = np.argmin(self.dist(X, self.cluster_centers_), axis=1)
-            for i in set(self.y_pred):
-                self.cluster_centers_[i] = np.mean(X[self.y_pred == i], axis=0)
+            old_centroids = self.centroids.copy()
 
-            if (old_centroids == self.cluster_centers_).all():
+            # measure the distance between each point and K centroids
+            # and assign the nearest centroid to each point
+            self.y_pred = np.argmin(self.dist(X, self.centroids), axis=1)
+
+            # recalculate means (centroids) for obervations assigned to each cluster
+            for i in set(self.y_pred):
+                self.centroids[i] = np.mean(X[self.y_pred == i], axis=0)
+
+            # stop when the clustering did not change at all during the last iteration
+            if (old_centroids == self.centroids).all():
                 continue_condition = False
 
     def predict(self, X):
-        return np.argmin(self.dist(X, self.cluster_centers_), axis=1)
-
-
+        # measure the distance between each new sample and K centroids
+        # and assign the nearest centroid to each point
+        return np.argmin(self.dist(X, self.centroids), axis=1)

@@ -1,4 +1,3 @@
-
 from sklearn.metrics.pairwise import euclidean_distances
 import numpy as np
 
@@ -13,7 +12,7 @@ class KMeans(object):
     def fit(self, X):
         # Randomly initialize K cluster centroids
         rint = self.rstate.randint
-        initial_indices = [rint(X.shape[0])]  # indices of initial clusters
+        initial_indices = [rint(X.shape[0])]  # indices of initial centroids
         for _ in range(self.K - 1):
             i = rint(X.shape[0])
             # check if point i is already extracted
@@ -23,22 +22,17 @@ class KMeans(object):
         # at this point: len(initial_indices) = K
         self.centroids = X[initial_indices, :]
 
-        continue_condition = True
-
-        while continue_condition:
+        # stop when the clustering did not change at all during the last iteration
+        old_centroids = self.centroids
+        while (old_centroids == self.centroids).all():
             old_centroids = self.centroids.copy()
 
-            # measure the distance between each point and K centroids
-            # and assign the nearest centroid to each point
-            self.y_pred = np.argmin(self.dist(X, self.centroids), axis=1)
+            self.y_pred = self.predict(X)
 
             # recalculate means (centroids) for obervations assigned to each cluster
             for i in set(self.y_pred):
                 self.centroids[i] = np.mean(X[self.y_pred == i], axis=0)
 
-            # stop when the clustering did not change at all during the last iteration
-            if (old_centroids == self.centroids).all():
-                continue_condition = False
 
     def predict(self, X):
         # measure the distance between each new sample and K centroids

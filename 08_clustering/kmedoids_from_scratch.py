@@ -1,38 +1,45 @@
-
 from sklearn.metrics.pairwise import euclidean_distances
 import numpy as np
 
 
 class KMedoids(object):
     def __init__(self, n_clusters=2, dist=euclidean_distances, random_state=42):
-        self.n_clusters = n_clusters
+        self.K = n_clusters
         self.dist = dist
         self.rstate = np.random.RandomState(random_state)
-        self.cluster_centers_ = []
-        self.indices = []
+        self.medoids = []
+        self.indices = []  # indices of medoids
 
     def fit(self, X):
+        # Randomly initialize K cluster centroids
         rint = self.rstate.randint
-        self.indices = [rint(X.shape[0])]
-        for _ in range(self.n_clusters - 1):
+        self.indices = [rint(X.shape[0])]  # indices of initial medoids
+        for _ in range(self.K - 1):
             i = rint(X.shape[0])
+            # check if point i is already extracted
             while i in self.indices:
                 i = rint(X.shape[0])
             self.indices.append(i)
-        self.cluster_centers_ = X[self.indices, :]
+        # at this point: len(initial_indices) = K
+        self.medoids = X[self.indices, :]
 
-        self.y_pred = np.argmin(self.dist(X, self.cluster_centers_), axis=1)
+        # measure the distance between each point and K medoids
+        # and assign to each point the nearest medoid
+        self.y_pred = self.predict(X)
         cost, _ = self.compute_cost(X, self.indices)
+
         new_cost = cost
         new_y_pred = self.y_pred.copy()
         new_indices = self.indices[:]
+
+        # only to start the first loop because in the first loop: new_cost = cost
         initial = True
         while (new_cost < cost) | initial:
             initial = False
             cost = new_cost
             self.y_pred = new_y_pred
             self.indices = new_indices
-            for k in range(self.n_clusters):
+            for k in range(self.K):
                 for r in [i for i, x in enumerate(new_y_pred == k) if x]:
                     if r not in self.indices:
                         indices_temp = self.indices[:]
@@ -43,13 +50,14 @@ class KMedoids(object):
                             new_y_pred = y_pred_temp
                             new_indices = indices_temp
 
-        self.cluster_centers_ = X[self.indices, :]
+        self.medoids = X[self.indices, :]
 
     def compute_cost(self, X, indices):
+        # returns cost and labels
         y_pred = np.argmin(self.dist(X, X[indices,:]), axis=1)
         return np.sum([np.sum(self.dist(X[y_pred == i], X[[indices[i]], :])) for i in set(y_pred)]), y_pred
 
     def predict(self, X):
-        return np.argmin(self.dist(X, self.cluster_centers_), axis=1)
-
-
+        # measure the distance between each new sample and K medoids
+        # and assign the nearest medoid to each point
+        return np.argmin(self.dist(X, self.medoids), axis=1)

@@ -11,13 +11,12 @@ class KMedoids(object):
 
     def fit(self, X):
         # Randomly initialize K cluster centroids
-        rint = self.rstate.randint
-        indices = [rint(X.shape[0])]  # indices of initial medoids
+        indices = [self.rstate.randint(X.shape[0])]  # indices of initial medoids
         for _ in range(self.K - 1):
-            i = rint(X.shape[0])
+            i = self.rstate.randint(X.shape[0])
             # check if point i is already extracted
             while i in indices:
-                i = rint(X.shape[0])
+                i = self.rstate.randint(X.shape[0])
             indices.append(i)
         # at this point: len(indices) = K
         self.medoids = X[indices, :]

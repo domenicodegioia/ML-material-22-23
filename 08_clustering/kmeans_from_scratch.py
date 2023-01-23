@@ -11,13 +11,12 @@ class KMeans(object):
 
     def fit(self, X):
         # Randomly initialize K cluster centroids
-        rint = self.rstate.randint
-        initial_indices = [rint(X.shape[0])]  # indices of initial centroids
+        initial_indices = [self.rstate.randint(X.shape[0])]  # indices of initial centroids
         for _ in range(self.K - 1):
-            i = rint(X.shape[0])
+            i = self.rstate.randint(X.shape[0])
             # check if point i is already extracted
             while i in initial_indices:
-                i = rint(X.shape[0])
+                i = self.rstate.randint(X.shape[0])
             initial_indices.append(i)
         # at this point: len(initial_indices) = K
         self.centroids = X[initial_indices, :]

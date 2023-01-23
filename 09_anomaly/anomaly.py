@@ -1,4 +1,3 @@
-import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.mixture import GaussianMixture
@@ -6,8 +5,6 @@ from sklearn.manifold import TSNE
 
 
 df = pd.read_csv('../data/cardio.csv')
-print(df.head())
-print(df.tail())
 
 training = df[df.y == 0].drop(columns='y').values
 test = df[df.y == 1].drop(columns='y').values
@@ -15,14 +12,19 @@ test = df[df.y == 1].drop(columns='y').values
 plt.scatter(training[:, 1], training[:, 2])
 plt.show()
 
-data_complete = df.drop(columns='y').values
-labels_complete = df['y'].values
+X = df.drop(columns='y').values
+y = df['y'].values
 
+# t-SNE [1] is a tool to visualize high-dimensional data. It converts similarities between data points to joint
+# probabilities and tries to minimize the Kullback-Leibler divergence between the joint probabilities of the
+# low-dimensional embedding and the high-dimensional data.
 tsne = TSNE(n_components=2)
-data_viz = tsne.fit_transform(data_complete)
-plt.scatter(data_viz[:, 0], data_viz[:, 1], c=labels_complete)
+# Fit X into an embedded space and return that transformed output.
+data_viz = tsne.fit_transform(X)
+plt.scatter(data_viz[:, 0], data_viz[:, 1], c=y)
 plt.show()
 
+# Fit parameters of GMM via EM algorithm
 gmm = GaussianMixture(n_components=10, covariance_type='full')
 gmm.fit(training)
 

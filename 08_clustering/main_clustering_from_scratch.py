@@ -5,7 +5,7 @@ from sklearn.metrics import silhouette_score
 import kmeans_from_scratch
 import kmedoids_from_scratch
 
-SEED = 88
+SEED = 42
 
 X, y = datasets.make_blobs(n_samples=500,
                            n_features=2,

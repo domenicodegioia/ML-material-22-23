@@ -52,7 +52,8 @@ class KMedoids(object):
     def compute_cost(self, X, indices):
         # returns cost and labels
         y_pred = np.argmin(self.dist(X, X[indices,:]), axis=1)
-        return np.sum([np.sum(self.dist(X[y_pred == i], X[[indices[i]], :])) for i in set(y_pred)]), y_pred
+        cost = np.sum([np.sum(self.dist(X[y_pred == i], X[[indices[i]], :])) for i in set(y_pred)])
+        return cost, y_pred
 
     def predict(self, X):
         # measure the distance between each new sample and K medoids

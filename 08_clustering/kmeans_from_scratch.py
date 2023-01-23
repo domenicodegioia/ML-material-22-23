@@ -24,6 +24,7 @@ class KMeans(object):
         while True:
             old_centroids = self.centroids.copy()
 
+            # assign each point to a cluster
             self.y_pred = self.predict(X)
 
             # recalculate means (centroids) for obervations assigned to each cluster

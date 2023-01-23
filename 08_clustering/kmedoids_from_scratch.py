@@ -35,7 +35,9 @@ class KMedoids(object):
             y_pred = new_y_pred
 
             for k in range(self.K):
+                # for each prediction belonging to a specific cluster
                 for r in [i for i, x in enumerate(new_y_pred == k) if x]:
+                    # if the point is not a centroid
                     if r not in indices:
                         indices_temp = indices.copy()
                         indices_temp[k] = r

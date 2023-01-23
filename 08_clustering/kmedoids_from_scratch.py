@@ -8,49 +8,47 @@ class KMedoids(object):
         self.dist = dist
         self.rstate = np.random.RandomState(random_state)
         self.medoids = []
-        self.indices = []  # indices of medoids
 
     def fit(self, X):
         # Randomly initialize K cluster centroids
         rint = self.rstate.randint
-        self.indices = [rint(X.shape[0])]  # indices of initial medoids
+        indices = [rint(X.shape[0])]  # indices of initial medoids
         for _ in range(self.K - 1):
             i = rint(X.shape[0])
             # check if point i is already extracted
-            while i in self.indices:
+            while i in indices:
                 i = rint(X.shape[0])
-            self.indices.append(i)
-        # at this point: len(initial_indices) = K
-        self.medoids = X[self.indices, :]
+            indices.append(i)
+        # at this point: len(indices) = K
+        self.medoids = X[indices, :]
 
-        # measure the distance between each point and K medoids
-        # and assign to each point the nearest medoid
-        self.y_pred = self.predict(X)
-        cost, _ = self.compute_cost(X, self.indices)
+        cost, y_pred = self.compute_cost(X, indices)
 
         new_cost = cost
-        new_y_pred = self.y_pred.copy()
-        new_indices = self.indices[:]
+        new_y_pred = y_pred.copy()
 
         # only to start the first loop because in the first loop: new_cost = cost
         initial = True
         while (new_cost < cost) | initial:
             initial = False
+
             cost = new_cost
-            self.y_pred = new_y_pred
-            self.indices = new_indices
+            y_pred = new_y_pred
+
             for k in range(self.K):
                 for r in [i for i, x in enumerate(new_y_pred == k) if x]:
-                    if r not in self.indices:
-                        indices_temp = self.indices[:]
+                    if r not in indices:
+                        indices_temp = indices.copy()
                         indices_temp[k] = r
+
                         new_cost_temp, y_pred_temp = self.compute_cost(X, indices_temp)
+
                         if new_cost_temp < new_cost:
                             new_cost = new_cost_temp
                             new_y_pred = y_pred_temp
-                            new_indices = indices_temp
+                            indices = indices_temp
 
-        self.medoids = X[self.indices, :]
+        self.medoids = X[indices, :]
 
     def compute_cost(self, X, indices):
         # returns cost and labels

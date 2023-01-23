@@ -22,9 +22,7 @@ class KMeans(object):
         # at this point: len(initial_indices) = K
         self.centroids = X[initial_indices, :]
 
-        # stop when the clustering did not change at all during the last iteration
-        old_centroids = self.centroids
-        while (old_centroids == self.centroids).all():
+        while True:
             old_centroids = self.centroids.copy()
 
             self.y_pred = self.predict(X)
@@ -32,6 +30,10 @@ class KMeans(object):
             # recalculate means (centroids) for obervations assigned to each cluster
             for i in set(self.y_pred):
                 self.centroids[i] = np.mean(X[self.y_pred == i], axis=0)
+
+            # stop when the clustering did not change at all during the last iteration
+            if (old_centroids == self.centroids).all():
+                break
 
 
     def predict(self, X):

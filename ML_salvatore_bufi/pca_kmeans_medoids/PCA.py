@@ -1,16 +1,29 @@
 import numpy as np
 
-def pca(x, red_index=1):
-    m = len(x)
-    sigma = ( 1/ m) * (x.T @ x)
-    u, s, v = np.linalg.svd(sigma)
+class PCA:
+    def __init__(self, n_components=None):
+        self.n_components = n_components
+        self.U = None
 
-    u_reduced = u[:, :red_index]
-    x_reduced = x @ u_reduced
+    def fit(self, X):
+        mean = X.mean(axis=0)
+        std = X.std(axis=0)
+        X = (X - mean) / std
 
-    reconstruct = x_reduced @ u_reduced.T
+        m = X.shape[0]
 
-    var = (sum(s[:red_index])) / sum(s)
+        Sigma = (1 / m) * X.T.dot(X)
 
-    return x_reduced, var
+        U, S, _ = np.linalg.svd(Sigma)
 
+        if self.n_components is None:
+            self.U = U
+        else:
+            self.U = U[:, : self.n_components]
+
+    def transform(self, X):
+        return self.U.dot(X)
+
+    def fit_transform(self, X):
+        self.fit(X)
+        return self.transform(X)
